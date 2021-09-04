@@ -1,0 +1,48 @@
+SetSortColumns()
+The SetSortColumns() function to set the sort for a column (the columns that can be seen in Details view) is coded this way:
+
+Func SetSortColumns( $sGUID, $iPID, $iSort )
+  ; Create SORTCOLUMN structure
+  Local $tSortColumn = DllStructCreate( $tagSORTCOLUMN )
+  _WinAPI_GUIDFromStringEx( $sGUID, $tSortColumn )
+  DllStructSetData( $tSortColumn, "pid", $iPID )
+  DllStructSetData( $tSortColumn, "sort", $iSort )
+
+  ; Set sort columns
+  $oIFolderView2.SetSortColumns( $tSortColumn, 1 )
+EndFunc
+This is the Microsoft definition of the IFolderView2.SetSortColumns() method:
+
+HRESULT SetSortColumns(
+  SORTCOLUMN *rgSortColumns, // Structure
+  int        cColumns        // Integer, number of columns
+)
+
+// SORTCOLUMN structure
+struct tagSORTCOLUMN {
+  PROPERTYKEY   propkey;   // Structure
+  SORTDIRECTION direction; // Integer, sort direction, 1 or -1
+}
+
+// PROPERTYKEY structure
+struct tagPROPERTYKEY {
+  GUID  fmtid; // Unique identifier of the PROPERTYKEY
+  dword pid;   // Property identifier (PID)
+}
+And these are the AutoIt definitions:
+
+; PROPERTYKEY Structure (GUID & PID)
+Global Const $tagPROPERTYKEY = "struct;ulong Data1;ushort Data2;ushort Data3;byte Data4[8];endstruct" & ";dword pid"
+
+; SORTCOLUMN Structure
+Global Const $tagSORTCOLUMN = $tagPROPERTYKEY & ";int sort"
+The information needed for the SetSortColumns() function to create the SORTCOLUMN structure is therefore $sGUID and $iPID, which defines the PROPERTYKEY structure, and $iSort, which defines the final SORTCOLUMN structure.
+
+To obtain $sGUID and $iPID from a PROPERTYKEY structure, a new function GetSortColumnsEx() has been added, which returns $sGUID and $iPID in addition to the original information from GetSortColumns().
+
+Output from GetSortColumnsEx() for System.ItemNameDisplay PropertyKey:
+
+GUID   -> {B725F130-47EF-101A-A5F1-02608C9EEBAC}
+PID    -> 10
+Sort   -> 1
+Column -> System.ItemNameDisplay
